@@ -1,15 +1,7 @@
-import express, {
-  json,
-  urlencoded,
-  Express,
-  Request,
-  Response,
-  NextFunction,
-  Router,
-} from 'express';
+import express, { json, urlencoded, Express, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
+import { ApiRouter } from '../routers/api-router';
 import { PORT } from './config';
-import { SampleRouter } from './routers/sample.router';
 
 export default class App {
   private app: Express;
@@ -38,31 +30,27 @@ export default class App {
     });
 
     // error
-    this.app.use(
-      (err: Error, req: Request, res: Response, next: NextFunction) => {
-        if (req.path.includes('/api/')) {
-          console.error('Error : ', err.stack);
-          res.status(500).send('Error !');
-        } else {
-          next();
-        }
-      },
-    );
+    this.app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+      if (req.path.includes('/api/')) {
+        console.error('Error : ', err.stack);
+        res.status(500).send('Error !');
+      } else {
+        next();
+      }
+    });
   }
 
   private routes(): void {
-    const sampleRouter = new SampleRouter();
-
+    const apiRouter = new ApiRouter();
     this.app.get('/', (req: Request, res: Response) => {
-      res.send(`Hello, Purwadhika Student !`);
+      res.send(`Hello from api !`);
     });
-
-    this.app.use('/samples', sampleRouter.getRouter());
+    this.app.use('/api', apiRouter.getRouter());
   }
 
   public start(): void {
-    this.app.listen(PORT, () => {
-      console.log(`  ➜  [API] Local:   http://localhost:${PORT}/`);
+    this.app.listen(process.env.PORT, () => {
+      console.log(`  ➜  [API] Local:   http://localhost:${PORT}`);
     });
   }
 }

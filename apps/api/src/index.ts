@@ -1,7 +1,8 @@
-import App from './app';
+import { z } from 'zod';
+import App from './app/app';
 
 const main = () => {
-  // init db here
+  // configs();
 
   const app = new App();
   app.start();
