@@ -28,7 +28,7 @@
   ],
   "husky": {
     "hooks": {
-      "pre-commit": "npx lint-staged && npm run build"
+      "pre-commit": "npx lint-staged"
     }
   }
 }
