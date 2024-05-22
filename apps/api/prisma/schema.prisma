@@ -10,7 +10,223 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum OrderStatus {
+  WaitingForPayment
+  WaitingForPaymentConfirmation
+  Processed
+  Shipped
+  OrderConfirmed
+  Cancelled
+}
+
+enum PaymentMethod {
+  Manual
+  PaymentGateway
+}
+
+enum Role {
+  Buyer
+  SuperAdmin
+  WarehouseAdmin
+}
+
+enum AuthType {
+  Local
+  Google
+}
+
+enum Brand {
+  Adiddas
+  Nike
+  Converse
+  Puma
+  Jordan
+}
+
+enum HistoryType {
+  Increment
+  Decrement
+}
+
+enum StatusMutation {
+  Request
+  Canceled
+  Confirmed
+  Sending
+  Sended
+}
+
 model User {
-  id       Int    @id @default(autoincrement())
-  username String
+  id          String        @id @default(cuid())
+  username    String
+  email       String        @unique
+  authDetail  AuthDetail?
+  userProfile UserProfile?
+  cart        Cart[]
+  transaction Transaction[]
+  role        Role          @default(Buyer)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  warehouseId String?
+  warehouse   Warehouse?    @relation(fields: [warehouseId], references: [id])
+}
+
+model AuthDetail {
+  id                String    @id @default(cuid())
+  User              User      @relation(fields: [userId], references: [id])
+  userId            String    @unique
+  email             String    @unique
+  password          String?
+  tokenVerification String?
+  otpVerification   String?
+  epxiredOtp        DateTime?
+  authType          AuthType  @default(Local)
+  confirmed         Boolean   @default(false)
+  token             Token[]
+}
+
+model Token {
+  id           String      @id @default(cuid())
+  token        String
+  blocked      Boolean     @default(false)
+  expiredAt    DateTime
+  authDetail   AuthDetail? @relation(fields: [authDetailId], references: [id])
+  authDetailId String?
+}
+
+model UserProfile {
+  id        String  @id @default(cuid())
+  User      User    @relation(fields: [userId], references: [id])
+  userId    String  @unique
+  email     String  @unique
+  phone     String?
+  avatarUrl String?
+  bio       String? @db.LongText
+}
+
+model Address {
+  id            String        @id @default(cuid())
+  name          String
+  receipentName String
+  phone         String
+  fullAddress   String        @db.LongText
+  latitude      Float
+  longitude     Float
+  isMainAddress Boolean       @default(true)
+  cityId        Int?
+  city          City?         @relation(fields: [cityId], references: [id])
+  warehouse     Warehouse?    @relation(fields: [warehouseId], references: [id])
+  warehouseId   String?       @unique
+  transaction   Transaction[]
+}
+
+model Product {
+  id            String         @id @default(cuid())
+  name          String
+  price         Float
+  image         ProductImage[]
+  description   String         @db.LongText
+  specification String         @db.LongText
+  brand         Brand
+  weight        Int            @default(0)
+  deleted       Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  Stock         Stock?         @relation(fields: [stockId], references: [id])
+  stockId       String?        @unique
+  cart          Cart?          @relation(fields: [cartId], references: [id])
+  cartId        String?        @unique
+  transaction   Transaction[]
+}
+
+model ProductImage {
+  id        Int      @id @default(autoincrement())
+  imageUrl  String
+  Product   Product? @relation(fields: [productId], references: [id])
+  productId String?
+}
+
+model Stock {
+  id            String          @id @default(cuid())
+  qty           Int
+  warehouse     Warehouse?      @relation(fields: [warehouseId], references: [id])
+  warehouseId   String?
+  product       Product?
+  stockHistory  StockHistory[]
+  stockMutation StockMutation[]
+}
+
+model StockHistory {
+  id        Int      @id @default(autoincrement())
+  Stock     Stock?   @relation(fields: [stockId], references: [id])
+  stockId   String?
+  increment Int?
+  decrement Int?
+  totalQty  Int
+  createdAt DateTime @default(now())
+}
+
+model StockMutation {
+  id             Int            @id @default(autoincrement())
+  Stock          Stock?         @relation(fields: [stockId], references: [id])
+  stockId        String?
+  status         StatusMutation @default(Request)
+  warehouseReqId Warehouse?
+  amount         Int
+  createdAt      DateTime
+}
+
+model Warehouse {
+  id              String         @id @default(cuid())
+  name            String
+  phone           String
+  address         Address?
+  admin           User[]
+  stock           Stock[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  stockMutationId Int?           @unique
+  stockMutation   StockMutation? @relation(fields: [stockMutationId], references: [id])
+  transaction     Transaction[]
+}
+
+model Cart {
+  id      String   @id @default(cuid())
+  product Product?
+  qty     Int
+  user    User?    @relation(fields: [userId], references: [id])
+  userId  String?
+}
+
+model Transaction {
+  id              String        @id @default(cuid())
+  warehouse       Warehouse?    @relation(fields: [warehouseId], references: [id])
+  warehouseId     String?
+  product         Product?      @relation(fields: [productId], references: [id])
+  productId       String?
+  qty             Int
+  shippingCost    Float
+  status          OrderStatus   @default(WaitingForPayment)
+  paymentMethod   PaymentMethod
+  paymentProofUrl String?
+  addressId       String?
+  userId          String?
+  address         Address?      @relation(fields: [addressId], references: [id])
+  user            User?         @relation(fields: [userId], references: [id])
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model City {
+  id         Int       @id @default(autoincrement())
+  cityName   String
+  province   Province? @relation(fields: [provinceId], references: [id])
+  provinceId Int?
+  address    Address[]
+}
+
+model Province {
+  id           Int    @id @default(autoincrement())
+  provinceName String
+  City         City[]
 }
