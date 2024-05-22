@@ -1,7 +1,10 @@
 import express, { json, urlencoded, Express, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
-import { ApiRouter } from '../routers/api-router';
+import cookieParser from 'cookie-parser';
 import { PORT } from './config';
+import { ApiRouter } from '../routers/api-router';
+import { corsOptions } from '../utils/cors-option';
+import { logger } from '../utils/logger';
 
 export default class App {
   private app: Express;
@@ -14,9 +17,10 @@ export default class App {
   }
 
   private configure(): void {
-    this.app.use(cors());
+    this.app.use(cors(corsOptions));
     this.app.use(json());
     this.app.use(urlencoded({ extended: true }));
+    this.app.use(cookieParser());
   }
 
   private handleError(): void {
@@ -32,7 +36,7 @@ export default class App {
     // error
     this.app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
       if (req.path.includes('/api/')) {
-        console.error('Error : ', err.stack);
+        logger.error('Error : ', err.stack);
         res.status(500).send('Error !');
       } else {
         next();
@@ -50,7 +54,7 @@ export default class App {
 
   public start(): void {
     this.app.listen(process.env.PORT, () => {
-      console.log(`  ➜  [API] Local:   http://localhost:${PORT}`);
+      logger.info(`  ➜  [API] Local:   http://localhost:${PORT}`);
     });
   }
 }
