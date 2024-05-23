@@ -5,6 +5,9 @@ import { PORT } from './config';
 import { ApiRouter } from '../routers/api-router';
 import { corsOptions } from '../utils/cors-option';
 import { logger } from '../utils/logger';
+import helmet from 'helmet';
+import morgan from 'morgan';
+import swaggerDocs from '../utils/swagger';
 
 export default class App {
   private app: Express;
@@ -17,6 +20,8 @@ export default class App {
   }
 
   private configure(): void {
+    this.app.use(helmet());
+    this.app.use(morgan('dev'));
     this.app.use(cors(corsOptions));
     this.app.use(json());
     this.app.use(urlencoded({ extended: true }));
@@ -27,6 +32,7 @@ export default class App {
     // not found
     this.app.use((req: Request, res: Response, next: NextFunction) => {
       if (req.path.includes('/api/')) {
+        logger.error('Not found : ', req.path);
         res.status(404).send('Not found !');
       } else {
         next();
@@ -54,7 +60,8 @@ export default class App {
 
   public start(): void {
     this.app.listen(process.env.PORT, () => {
-      logger.info(`  ➜  [API] Local:   http://localhost:${PORT}`);
+      console.log(`   - [API] Local:  http://localhost:${PORT}`);
+      swaggerDocs(this.app, PORT);
     });
   }
 }
