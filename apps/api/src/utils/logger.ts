@@ -1,5 +1,5 @@
 import winston from 'winston';
-import SlackHook from 'winston-slack-webhook-transport';
+import DiscordTransport from 'winston-discord-transport';
 
 export const logger = winston.createLogger({
   level: 'debug',
@@ -7,6 +7,9 @@ export const logger = winston.createLogger({
   defaultMeta: { service: 'API' },
   transports: [
     new winston.transports.Console({ format: winston.format.simple() }),
-    new SlackHook({ webhookUrl: process.env.SLACK_WEBHOOK_URL, format: winston.format.simple() }),
+    new DiscordTransport({
+      webhook: process.env.DISCORD_WEBHOOK_URL,
+      defaultMeta: { service: 'API' },
+    }),
   ],
 });

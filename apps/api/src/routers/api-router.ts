@@ -12,7 +12,19 @@ export class ApiRouter {
   }
 
   private initializeRoutes(): void {
+    /**
+     * @openapi
+     * /api/healthcheck:
+     *  get:
+     *    tags:
+     *      - Healthcheck
+     *    description: API Healthcheck
+     *    responses:
+     *      200:
+     *        description: API is up and running
+     */
     this.router.get('/');
+    this.router.get('/healthcheck', (req, res) => res.status(200).json({ message: 'API is up and running!' }));
     this.router.use('/sample', this.sampleRouter.getRouter());
   }
 

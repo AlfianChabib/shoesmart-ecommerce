@@ -16,6 +16,7 @@ export const envSchema = z.object({
   PORT: z.coerce.number().default(8000),
   BASE_FRONTEND_URL: z.string().url(),
   SLACK_WEBHOOK_URL: z.string().url(),
+  DISCORD_WEBHOOK_URL: z.string().url(),
 });
 
 const env = envSchema.parse(process.env);
