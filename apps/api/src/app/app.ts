@@ -41,7 +41,10 @@ export default class App {
     this.app.use((req: Request, res: Response, next: NextFunction) => {
       if (req.path.includes('/api/')) {
         logger.error('Not found : ', req.path);
-        res.status(404).send('Not found !');
+        res.status(404).json({
+          status: 'failed',
+          message: 'Oops! Path not found!',
+        });
       } else {
         next();
       }
