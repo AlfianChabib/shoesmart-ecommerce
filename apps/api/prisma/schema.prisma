@@ -134,10 +134,8 @@ model Product {
   updatedAt     DateTime       @updatedAt
   Stock         Stock?         @relation(fields: [stockId], references: [id])
   stockId       String?        @unique
-  // cart          Cart?          @relation(fields: [cartId], references: [id])
-  // cartId        String?        @unique
+  cart          Cart[] 
   transaction   Transaction[]
-  Cart          Cart[]
 }
 
 model ProductImage {
@@ -192,13 +190,13 @@ model Warehouse {
 }
 
 model Cart {
-  id        String   @id @default(cuid())
-  productId String
-  qty       Int
-  // totalPric
-  userId    String?
-  user      User?    @relation(fields: [userId], references: [id])
-  product   Product? @relation(fields: [productId], references: [id])
+  id         String   @id @default(cuid())
+  qty        Int
+  totalPrice Float
+  userId     String?
+  productId  String?
+  user       User?    @relation(fields: [userId], references: [id])
+  Product    Product? @relation(fields: [productId], references: [id])
 }
 
 model Transaction {
