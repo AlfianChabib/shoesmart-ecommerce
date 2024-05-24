@@ -14,7 +14,7 @@ export class CartRouter {
   }
 
   initializeRoutes(): void {
-    this.router.post('/cart', validate(CartValidation.ADDCART, ValidationType.BODY), this.cartController.addCart);
+    this.router.post('/cart', validate(CartValidation.CARTBODY, ValidationType.BODY), this.cartController.addCart);
   }
 
   getRouter(): Router {
