@@ -1,11 +1,11 @@
-import { z, ZodType } from 'zod';
+import { z } from 'zod';
 
 export class AuthValidation {
   static readonly register = z.object({
     email: z.string().email({ message: 'Please enter a valid email' }),
   });
 
-  static readonly verification: ZodType = z
+  static readonly verification = z
     .object({
       token: z.string({ required_error: 'Token is required' }),
       username: z.string().min(3, { message: 'Username must be at least 3 characters' }),
@@ -18,16 +18,16 @@ export class AuthValidation {
       }
     });
 
-  static readonly login: ZodType = z.object({
+  static readonly login = z.object({
     email: z.string().email({ message: 'Please enter a valid email' }),
     password: z.string().min(8, { message: 'Password must be at least 6 characters' }),
   });
 
-  static readonly forgotPassword: ZodType = z.object({
+  static readonly forgotPassword = z.object({
     email: z.string().email({ message: 'Please enter a valid email' }),
   });
 
-  static readonly resetPassword: ZodType = z
+  static readonly resetPassword = z
     .object({
       oldPassword: z.string().min(8, { message: 'Password must be at least 6 characters' }),
       newPassword: z.string().min(8, { message: 'Password must be at least 6 characters' }),
@@ -39,7 +39,7 @@ export class AuthValidation {
       }
     });
 
-  static readonly changeEmail: ZodType = z.object({
+  static readonly changeEmail = z.object({
     email: z.string().email({ message: 'Please enter a valid email' }),
   });
 }
