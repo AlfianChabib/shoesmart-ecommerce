@@ -1,19 +1,23 @@
 import express, { json, urlencoded, Express, Request, Response, NextFunction } from 'express';
+import passport, { PassportStatic } from 'passport';
 import cors from 'cors';
+import helmet from 'helmet';
+import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
-import { PORT } from './config';
+import env from './config';
 import { ApiRouter } from '../routers/api-router';
 import { corsOptions } from '../utils/cors-option';
 import { logger } from '../utils/logger';
-import helmet from 'helmet';
-import morgan from 'morgan';
-import swaggerDocs from '../utils/swagger';
+import { strategy } from '../lib/passport';
+import { errorMiddleware } from '../middleware/error-middleware';
 
 export default class App {
   private app: Express;
+  private passport: PassportStatic;
 
   constructor() {
     this.app = express();
+    this.passport = passport;
     this.configure();
     this.routes();
     this.handleError();
@@ -26,10 +30,14 @@ export default class App {
     this.app.use(json());
     this.app.use(urlencoded({ extended: true }));
     this.app.use(cookieParser());
+    this.app.use(this.passport.initialize());
+    this.passport.use(strategy.localStrategy);
+    this.passport.use(strategy.googleStrategy);
   }
 
   private handleError(): void {
     // not found
+    this.app.use(errorMiddleware);
     this.app.use((req: Request, res: Response, next: NextFunction) => {
       if (req.path.includes('/api/')) {
         logger.error('Not found : ', req.path);
@@ -59,9 +67,8 @@ export default class App {
   }
 
   public start(): void {
-    this.app.listen(process.env.PORT, () => {
-      console.log(`   - [API] Local:  http://localhost:${PORT}`);
-      swaggerDocs(this.app, PORT);
+    this.app.listen(env.PORT, () => {
+      console.log(`   - [API] Local:  http://localhost:${env.PORT}`);
     });
   }
 }

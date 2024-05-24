@@ -17,6 +17,9 @@ export const envSchema = z.object({
   BASE_FRONTEND_URL: z.string().url(),
   SLACK_WEBHOOK_URL: z.string().url(),
   DISCORD_WEBHOOK_URL: z.string().url(),
+  GOOGLE_CLIENT_ID: z.string().trim(),
+  GOOGLE_CLIENT_SECRET: z.string().trim(),
+  GOOGLE_CALLBACK_URL: z.string().url(),
 });
 
 const env = envSchema.parse(process.env);
