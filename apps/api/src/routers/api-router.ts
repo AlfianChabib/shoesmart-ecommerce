@@ -1,31 +1,19 @@
 import { Router } from 'express';
-import { SampleRouter } from './sample-router';
+import { AuthRouter } from './auth-router';
 
 export class ApiRouter {
   private router: Router;
-  private sampleRouter: SampleRouter;
+  private authRouter: AuthRouter;
 
   constructor() {
-    this.sampleRouter = new SampleRouter();
+    this.authRouter = new AuthRouter();
     this.router = Router();
     this.initializeRoutes();
   }
 
   private initializeRoutes(): void {
-    /**
-     * @openapi
-     * /api/healthcheck:
-     *  get:
-     *    tags:
-     *      - Healthcheck
-     *    description: API Healthcheck
-     *    responses:
-     *      200:
-     *        description: API is up and running
-     */
     this.router.get('/');
-    this.router.get('/healthcheck', (req, res) => res.status(200).json({ message: 'API is up and running!' }));
-    this.router.use('/sample', this.sampleRouter.getRouter());
+    this.router.use('/auth', this.authRouter.getRouter());
   }
 
   getRouter(): Router {
