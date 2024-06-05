@@ -21,14 +21,14 @@
     "turbo": "latest"
   },
   "name": "shoesmart",
-  "packageManager": "yarn@1.22.22",
+  "packageManager": "npm@8.15.0",
   "workspaces": [
     "apps/*",
     "packages/*"
   ],
   "husky": {
     "hooks": {
-      "pre-commit": "npx lint-staged"
+      "pre-commit": "npm run build"
     }
   }
 }
