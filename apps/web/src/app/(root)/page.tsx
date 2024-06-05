@@ -1,13 +1,11 @@
-'use client';
-
-import { useLoading } from '@/context/loading';
+import MaxWidthWrapper from '@/components/MaxWidthWrapper';
 
 export default function Home() {
-  const { loading } = useLoading();
-
   return (
-    <div>
-      <h1>Home</h1>
-    </div>
+    <main className="bg-gray-50">
+      <MaxWidthWrapper className="min-h-screen">
+        <h1>Home</h1>
+      </MaxWidthWrapper>
+    </main>
   );
 }

@@ -69,11 +69,12 @@ model User {
   updatedAt   DateTime      @updatedAt
   warehouseId String?
   warehouse   Warehouse?    @relation(fields: [warehouseId], references: [id])
+  address     Address[]
 }
 
 model AuthDetail {
   id                String    @id @default(cuid())
-  User              User      @relation(fields: [userId], references: [id])
+  User              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId            String    @unique
   email             String    @unique
   password          String?
@@ -90,15 +91,16 @@ model Token {
   token        String
   blocked      Boolean     @default(false)
   expiredAt    DateTime
-  authDetail   AuthDetail? @relation(fields: [authDetailId], references: [id])
+  authDetail   AuthDetail? @relation(fields: [authDetailId], references: [id], onDelete: Cascade)
   authDetailId String?
 }
 
 model UserProfile {
   id        String  @id @default(cuid())
-  User      User    @relation(fields: [userId], references: [id])
+  User      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String  @unique
   email     String  @unique
+  username  String
   phone     String?
   avatarUrl String?
   bio       String? @db.LongText
@@ -118,6 +120,8 @@ model Address {
   warehouse     Warehouse?    @relation(fields: [warehouseId], references: [id])
   warehouseId   String?       @unique
   transaction   Transaction[]
+  User          User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String?
 }
 
 model Product {
@@ -141,7 +145,7 @@ model Product {
 model ProductImage {
   id        Int      @id @default(autoincrement())
   imageUrl  String
-  Product   Product? @relation(fields: [productId], references: [id])
+  Product   Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId String?
 }
 
@@ -195,7 +199,7 @@ model Cart {
   totalPrice Float
   userId     String?
   productId  String?
-  user       User?    @relation(fields: [userId], references: [id])
+  user       User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   Product    Product? @relation(fields: [productId], references: [id])
 }
 
@@ -213,7 +217,7 @@ model Transaction {
   addressId       String?
   userId          String?
   address         Address?      @relation(fields: [addressId], references: [id])
-  user            User?         @relation(fields: [userId], references: [id])
+  user            User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 }

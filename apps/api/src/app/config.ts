@@ -20,6 +20,14 @@ export const envSchema = z.object({
   GOOGLE_CLIENT_ID: z.string().trim(),
   GOOGLE_CLIENT_SECRET: z.string().trim(),
   GOOGLE_CALLBACK_URL: z.string().url(),
+  NODEMAILER_USER: z.string().trim(),
+  NODEMAILER_PASS: z.string().trim(),
+  JWT_VERIFICATION_SECRET_TOKEN: z.string().trim(),
+  JWT_REFRESH_SECRET_TOKEN: z.string().trim(),
+  JWT_ACCESS_SECRET_TOKEN: z.string().trim(),
+  JWT_VERIFICATION_LIFETIME: z.string().trim(),
+  JWT_REFRESH_LIFETIME: z.string().trim(),
+  JWT_ACCESS_LIFETIME: z.string().trim(),
 });
 
 const env = envSchema.parse(process.env);

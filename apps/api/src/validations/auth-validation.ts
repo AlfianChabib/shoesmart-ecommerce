@@ -3,12 +3,16 @@ import { z } from 'zod';
 export class AuthValidation {
   static readonly register = z.object({
     email: z.string().email({ message: 'Please enter a valid email' }),
+    username: z.string().min(3, { message: 'Username must be at least 3 characters' }),
+  });
+
+  static readonly checkVerifyToken = z.object({
+    token: z.string({ required_error: 'Token is required' }),
   });
 
   static readonly verification = z
     .object({
       token: z.string({ required_error: 'Token is required' }),
-      username: z.string().min(3, { message: 'Username must be at least 3 characters' }),
       password: z.string().min(8, { message: 'Password must be at least 6 characters' }),
       confirmPassword: z.string(),
     })

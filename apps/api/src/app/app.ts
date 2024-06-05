@@ -10,6 +10,7 @@ import { corsOptions } from '../utils/cors-option';
 import { logger } from '../utils/logger';
 import { strategy } from '../lib/passport';
 import { errorMiddleware } from '../middleware/error-middleware';
+import { deserializeUser } from '../middleware/auth/deserialize';
 
 export default class App {
   private app: Express;
@@ -30,9 +31,9 @@ export default class App {
     this.app.use(json());
     this.app.use(urlencoded({ extended: true }));
     this.app.use(cookieParser());
-    this.app.use(this.passport.initialize());
-    this.passport.use(strategy.localStrategy);
     this.passport.use(strategy.googleStrategy);
+    this.app.use(this.passport.initialize());
+    this.app.use(deserializeUser);
   }
 
   private handleError(): void {
@@ -41,7 +42,10 @@ export default class App {
     this.app.use((req: Request, res: Response, next: NextFunction) => {
       if (req.path.includes('/api/')) {
         logger.error('Not found : ', req.path);
-        res.status(404).send('Not found !');
+        res.status(404).json({
+          status: 'failed',
+          message: 'Oops! Path not found!',
+        });
       } else {
         next();
       }
