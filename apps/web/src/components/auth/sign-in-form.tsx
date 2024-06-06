@@ -2,23 +2,35 @@
 
 import { Form } from '../ui/form';
 import { useForm } from 'react-hook-form';
-import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { InputField } from '../form-fields';
+import { queryClient } from '@/lib/query';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { AuthService } from '@/services/auth-service';
 import { LoginPayload } from '@/models/auth-model';
 import { AuthValidation } from '@/validation/auth-validation';
 import { useAlertMessage } from '@/hooks/alert-message';
-import { InputField } from '../form-fields';
-import { queryClient } from '@/lib/query';
+import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import Submit from '../molecules/Submit';
 import AlertMessage from '../molecules/AlertMessage';
 import SocialButton from './SocialButton';
-import Link from 'next/link';
 
 export default function SignInForm() {
   const { alertMessage, setAlertMessage } = useAlertMessage();
+  const searchParams = useSearchParams();
   const router = useRouter();
+
+  const accessToken = searchParams.get('accessToken') || '';
+
+  useEffect(() => {
+    if (accessToken) {
+      sessionStorage.setItem('accessToken', accessToken);
+      router.push('/');
+      queryClient.invalidateQueries({ queryKey: ['session'] });
+    }
+  }, [accessToken, router]);
 
   const form = useForm<LoginPayload>({
     resolver: zodResolver(AuthValidation.login),

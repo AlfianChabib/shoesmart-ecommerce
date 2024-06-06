@@ -122,7 +122,7 @@ export class AuthService {
       data: { token: { create: { token: hashToken(refreshToken), expiredAt: dayjs().add(7, 'days').toDate() } } },
     });
 
-    sendCookie(res, refreshToken, accessToken);
+    await sendCookie(res, refreshToken);
     return res.redirect(`http://localhost:3000/sign-in?accessToken=${accessToken}`);
   }
 
@@ -153,5 +153,18 @@ export class AuthService {
     });
     if (!user) throw new ResponseError(400, 'User not found');
     return sessionResponse(user);
+  }
+
+  static async logout(userId: string, refreshToken: string) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { authDetail: { include: { token: true } } },
+    });
+    if (!user) throw new ResponseError(400, 'User not found');
+
+    await prisma.authDetail.update({
+      where: { userId },
+      data: { token: { deleteMany: { token: hashToken(refreshToken) } } },
+    });
   }
 }

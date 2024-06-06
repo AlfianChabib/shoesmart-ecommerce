@@ -34,9 +34,9 @@ export default function SessionProvider({ children }: Readonly<{ children: React
   return <CurrentSessionContext.Provider value={session}>{children}</CurrentSessionContext.Provider>;
 }
 
-export const useCurrentSession = (): SessionData | undefined => {
+export const useCurrentSession = (): SessionData => {
   if (!useContext(CurrentSessionContext)) {
     throw new Error('useCurrentSession must be used within a CurrentSessionContextProvider');
   }
-  return useContext(CurrentSessionContext);
+  return useContext(CurrentSessionContext) as SessionData;
 };

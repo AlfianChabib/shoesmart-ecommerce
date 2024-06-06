@@ -3,7 +3,6 @@ import { validate, ValidationType } from '../helpers/validation';
 import { AuthValidation } from '../validations/auth-validation';
 import { AuthController } from '../controllers/auth-controller';
 import passport from 'passport';
-import authorization from '../middleware/auth/authorization';
 
 export class AuthRouter {
   private router: Router;
@@ -34,7 +33,8 @@ export class AuthRouter {
     );
     this.router.post('/login', validate(AuthValidation.login, ValidationType.BODY), this.authController.login);
     this.router.post('/refresh', this.authController.refreshToken);
-    this.router.get('/session', authorization('Buyer'), this.authController.session);
+    this.router.post('/logout', this.authController.logout);
+    this.router.get('/session', this.authController.session);
   }
 
   getRouter(): Router {

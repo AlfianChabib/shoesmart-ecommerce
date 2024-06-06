@@ -24,7 +24,7 @@ export const deserializeUser = async (req: Request, res: Response, next: NextFun
           throw new ResponseError(401, 'Invalid token');
         } else {
           res.locals.session = decoded;
-          req.user = decoded as IAuthTokenPayload;
+          req['user'] = decoded as IAuthTokenPayload;
           next();
         }
       },

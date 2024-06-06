@@ -8,7 +8,7 @@ import { ErrorHandler } from '@/utils/error-handler';
 export class AuthService {
   static async register(payload: RegisterPayload) {
     try {
-      const res = await api.post('/auth/register', payload);
+      const res = await api.post<SuccessResponse>('/auth/register', payload);
       return res.data;
     } catch (error) {
       throw new ErrorHandler(error);
@@ -24,9 +24,9 @@ export class AuthService {
     }
   }
 
-  static async accountVerification(payload: VerificationPayload) {
+  static async accountVerification(payload: VerificationPayload): Promise<SuccessResponse> {
     try {
-      const res = await api.post('/auth/register/verify', payload);
+      const res = await api.post<SuccessResponse>('/auth/register/verify', payload);
       return res.data;
     } catch (error) {
       throw new ErrorHandler(error);
@@ -35,7 +35,7 @@ export class AuthService {
 
   static async signIn(payload: LoginPayload) {
     try {
-      const res = await api.post('/auth/login', payload);
+      const res = await api.post<SuccessResponse & { accessToken: string }>('/auth/login', payload);
       return res.data;
     } catch (error) {
       throw new ErrorHandler(error);
@@ -52,6 +52,15 @@ export class AuthService {
       };
     } catch (error) {
       return initialSession;
+    }
+  }
+
+  static async signOut() {
+    try {
+      const res = await authApi.post<SuccessResponse>('/auth/logout');
+      return res.data;
+    } catch (error) {
+      throw new ErrorHandler(error);
     }
   }
 }

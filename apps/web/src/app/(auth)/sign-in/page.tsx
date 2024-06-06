@@ -1,7 +1,9 @@
-import SignInForm from '@/components/auth/sign-in-form';
 import MaxWidthWrapper from '@/components/MaxWidthWrapper';
 import AuthTemplate from '@/components/templates/auth-template';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
+
+const SignInForm = dynamic(() => import('@/components/auth/sign-in-form'));
 
 export default async function SignIn() {
   return (

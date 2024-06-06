@@ -66,7 +66,7 @@ export class AuthController {
 
       const { refreshToken, accessToken } = await AuthService.login(payload);
 
-      sendCookie(res, refreshToken, accessToken);
+      await sendCookie(res, refreshToken);
 
       return res.status(200).json({ success: true, message: 'Login success', accessToken, refreshToken });
     } catch (error) {
@@ -92,9 +92,27 @@ export class AuthController {
     }
   }
 
+  async logout(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { userId } = req.user as IAuthTokenPayload;
+
+      const { refreshToken } = req.cookies;
+      if (!refreshToken) throw new ResponseError(401, 'Refresh  token not found');
+
+      await AuthService.logout(userId, refreshToken);
+
+      res.clearCookie('refreshToken');
+      return res.status(201).json({ success: true, message: 'Logout success' });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async session(req: Request, res: Response, next: NextFunction) {
     try {
       const user = req.user as IAuthTokenPayload;
+
+      if (!user) throw new ResponseError(401, 'User not found');
 
       const session = await AuthService.getSession(user.userId);
 
