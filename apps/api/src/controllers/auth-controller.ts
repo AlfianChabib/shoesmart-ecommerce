@@ -2,11 +2,13 @@ import { User } from '@prisma/client';
 import { AuthService } from '../services/auth-service';
 import { NextFunction, Request, Response } from 'express';
 import {
+  ChangePasswordPayload,
   CheckVerifyTokenPayload,
   ForgotPasswordPayload,
   IAuthTokenPayload,
   LoginPayload,
   RegisterPayload,
+  ResetPasswordPayload,
   VerificationPayload,
 } from '../model/auth-model';
 import { sendCookie } from '../helpers/auth/send-cookie';
@@ -96,7 +98,8 @@ export class AuthController {
     try {
       const { userId } = req.user as IAuthTokenPayload;
 
-      const { refreshToken } = req.cookies;
+      console.log(req.cookies);
+      const refreshToken = req.cookies['refreshToken'];
       if (!refreshToken) throw new ResponseError(401, 'Refresh  token not found');
 
       await AuthService.logout(userId, refreshToken);
@@ -126,9 +129,45 @@ export class AuthController {
     try {
       const data = req.body as ForgotPasswordPayload;
 
-      await AuthService.forgotPassword(data);
+      const { userId } = await AuthService.forgotPassword(data);
 
-      return res.status(200).json({ success: true, message: 'Reset password url sent to your email' });
+      return res.status(200).json({ success: true, message: 'Check your email to reset password', data: { userId } });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async checkOtp(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { otp } = req.body as { otp: string };
+
+      const isValid = await AuthService.checkOTP(otp);
+
+      return res.status(200).json({ success: true, message: 'Check otp success', isValid });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async resetPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const payload = req.body as ResetPasswordPayload;
+
+      return res.status(200).json({ success: true, message: 'Reset password success' });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async changePassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const payload = req.body as ChangePasswordPayload;
+
+      await AuthService.changePassword(payload);
+
+      console.log(payload);
+
+      return res.status(200).json({ success: true, message: 'Change password success' });
     } catch (error) {
       next(error);
     }

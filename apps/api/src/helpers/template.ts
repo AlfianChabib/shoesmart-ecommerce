@@ -10,7 +10,12 @@ export class EmailTemplate {
     );
   }
 
-  static async forgotPassword(email: string) {
-    return await sendEmail(email, 'Forgot Password | Shoesmart Ecommerce', { email: email }, 'forgot-password');
+  static async forgotPassword(payload: { email: string; OTP: string; username: string }) {
+    return await sendEmail(
+      payload.email,
+      'Forgot Password | Shoesmart Ecommerce',
+      { email: payload.email, OTP: payload.OTP, username: payload.username },
+      'forgot-password',
+    );
   }
 }

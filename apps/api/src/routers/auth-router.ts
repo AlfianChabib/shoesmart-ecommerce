@@ -32,9 +32,25 @@ export class AuthRouter {
       this.authController.verificationRegister,
     );
     this.router.post('/login', validate(AuthValidation.login, ValidationType.BODY), this.authController.login);
+    this.router.get('/session', this.authController.session);
     this.router.post('/refresh', this.authController.refreshToken);
     this.router.post('/logout', this.authController.logout);
-    this.router.get('/session', this.authController.session);
+    this.router.post(
+      '/forgot-password',
+      validate(AuthValidation.forgotPassword, ValidationType.BODY),
+      this.authController.forgotPassword,
+    );
+    this.router.post(
+      '/reset-password',
+      validate(AuthValidation.resetPassword, ValidationType.BODY),
+      this.authController.resetPassword,
+    );
+    this.router.post(
+      '/change-password',
+      validate(AuthValidation.changePassword, ValidationType.BODY),
+      this.authController.changePassword,
+    );
+    this.router.post('/password/check-otp', this.authController.checkOtp);
   }
 
   getRouter(): Router {

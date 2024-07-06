@@ -1,7 +1,7 @@
 import { SessionData } from '@/components/providers/session-provider';
 import { initialSession } from '@/constants/session';
 import { api, authApi } from '@/lib/axios';
-import { LoginPayload, RegisterPayload, VerificationPayload } from '@/models/auth-model';
+import { ForgotPasswordPayload, LoginPayload, RegisterPayload, VerificationPayload } from '@/models/auth-model';
 import { SuccessResponse } from '@/types/api';
 import { ErrorHandler } from '@/utils/error-handler';
 
@@ -58,6 +58,27 @@ export class AuthService {
   static async signOut() {
     try {
       const res = await authApi.post<SuccessResponse>('/auth/logout');
+
+      return res.data;
+    } catch (error) {
+      throw new ErrorHandler(error);
+    }
+  }
+
+  static async forgotPassword(payload: ForgotPasswordPayload): Promise<SuccessResponse & { data: { userId: string } }> {
+    try {
+      const res = await api.post('/auth/forgot-password', payload);
+
+      return res.data;
+    } catch (error) {
+      throw new ErrorHandler(error);
+    }
+  }
+
+  static async changePassword(payload: VerificationPayload) {
+    try {
+      const res = await api.post('/auth/change-password', payload);
+
       return res.data;
     } catch (error) {
       throw new ErrorHandler(error);

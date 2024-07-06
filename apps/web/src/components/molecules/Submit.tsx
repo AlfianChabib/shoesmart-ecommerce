@@ -7,8 +7,8 @@ interface SubmitProps extends ButtonProps {
 
 export default function Submit({ label, ...props }: SubmitProps) {
   return (
-    <Button type="submit" {...props} className={cn(props.className)}>
-      <span>{label ? label : 'Submit'}</span>
+    <Button type="submit" {...props} className={cn(props.className, 'relative')}>
+      <span className={props.disabled ? 'svg-spinners--180-ring' : ''}>{label ? label : 'Submit'}</span>
     </Button>
   );
 }

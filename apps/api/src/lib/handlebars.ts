@@ -3,11 +3,11 @@ import { NodemailerExpressHandlebarsOptions } from 'nodemailer-express-handlebar
 
 export const handlebarsOptions: NodemailerExpressHandlebarsOptions = {
   viewEngine: {
-    extname: '.handlebars',
+    extname: '.hbs',
     defaultLayout: false,
     layoutsDir: path.resolve(__dirname, '../templates'),
     partialsDir: path.resolve(__dirname, '../templates'),
   },
   viewPath: path.resolve(__dirname, '../templates'),
-  extName: '.handlebars',
+  extName: '.hbs',
 };

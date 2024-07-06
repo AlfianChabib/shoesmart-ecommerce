@@ -19,7 +19,7 @@ export default function AuthTemplate({ children }: AuthTemplateProps) {
           <p>Back to home</p>
         </Link>
       </div>
-      <div className="bg-background flex min-h-[500px] w-full justify-between gap-4 rounded-xl border p-2 md:p-4">
+      <div className="bg-background flex min-h-[500px] w-full justify-between gap-4 rounded-xl border p-2 sm:p-4">
         <div className="hidden flex-1 items-center justify-center rounded-lg bg-blue-200 md:flex">
           <Image src="/auth.svg" alt="auth-image" width={300} height={300} priority />
         </div>

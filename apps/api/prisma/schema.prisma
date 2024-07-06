@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -73,17 +70,25 @@ model User {
 }
 
 model AuthDetail {
-  id                String    @id @default(cuid())
-  User              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId            String    @unique
-  email             String    @unique
+  id                String   @id @default(cuid())
+  User              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId            String   @unique
+  email             String   @unique
   password          String?
   tokenVerification String?
-  otpVerification   String?
-  epxiredOtp        DateTime?
-  authType          AuthType  @default(Local)
-  confirmed         Boolean   @default(false)
+  authType          AuthType @default(Local)
+  confirmed         Boolean  @default(false)
+  otp               Otp[]
   token             Token[]
+}
+
+model Otp {
+  id           Int         @id @default(autoincrement())
+  code         String      @unique
+  expires      DateTime
+  createdAt    DateTime    @default(now())
+  AuthDetail   AuthDetail? @relation(fields: [authDetailId], references: [id])
+  authDetailId String?
 }
 
 model Token {

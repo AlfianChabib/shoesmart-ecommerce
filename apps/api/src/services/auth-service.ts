@@ -4,21 +4,25 @@ import { User } from '@prisma/client';
 import { prisma } from '../app/prisma';
 import { hashToken } from '../helpers/hash-token';
 import { sendCookie } from '../helpers/auth/send-cookie';
+import { generateOTP, validateOtp } from '../helpers/otp';
 import { ResponseError } from '../helpers/response-error';
 import { EmailTemplate } from '../helpers/template';
+import { sessionResponse } from '../helpers/auth/session';
 import { NextFunction, Response } from 'express';
 import { Profile, VerifyCallback } from 'passport-google-oauth20';
 import { comparePassword, hashPassword } from '../lib/bcrypt';
 import { genVerification, verifyVerificationToken } from '../helpers/jwt/verification-token';
 import { generateAccessToken, generateAuthTokens, verifyRefreshToken } from '../helpers/jwt/auth-token';
 import {
+  ChangePasswordPayload,
   ForgotPasswordPayload,
   IAuthTokenPayload,
   LoginPayload,
   RegisterPayload,
+  ResetPasswordPayload,
   VerificationPayload,
 } from '../model/auth-model';
-import { sessionResponse } from '../helpers/auth/session';
+import { validateUserLogin } from '../helpers/auth/auth.helper';
 
 export class AuthService {
   static async register(payload: RegisterPayload) {
@@ -66,21 +70,19 @@ export class AuthService {
 
   static async login(payload: LoginPayload) {
     const existUser = await prisma.user.findUnique({ where: { email: payload.email }, include: { authDetail: true } });
-    if (!existUser) throw new ResponseError(400, 'Email not found');
-    if (!existUser.authDetail || !existUser.authDetail.confirmed)
-      throw new ResponseError(400, 'Email not verified, pleace verify your account');
+    const user = validateUserLogin(existUser);
 
-    const isMatch = comparePassword(payload.password, existUser.authDetail.password!);
+    const isMatch = comparePassword(payload.password, user.authDetail?.password!);
     if (!isMatch) throw new ResponseError(400, 'Wrong email or password');
 
     const { refreshToken, accessToken } = generateAuthTokens({
-      userId: existUser.id,
-      email: existUser.email,
-      role: existUser.role,
+      userId: user.id,
+      email: user.email,
+      role: user.role,
     });
 
     await prisma.authDetail.update({
-      where: { userId: existUser.id },
+      where: { userId: user.id },
       data: { token: { create: { token: hashToken(refreshToken), expiredAt: dayjs().add(7, 'days').toDate() } } },
     });
 
@@ -91,6 +93,7 @@ export class AuthService {
     try {
       if (!profile || !profile._json || !profile._json.email) throw new Error('Profile not found');
       const email = profile._json.email;
+
       const user = await prisma.user.findUnique({ where: { email }, include: { authDetail: true } });
       if (!user) {
         const newUser = await prisma.user.create({
@@ -101,6 +104,7 @@ export class AuthService {
             authDetail: { create: { email, confirmed: true, authType: 'Google' } },
           },
         });
+
         return done(null, newUser);
       } else if (user.authDetail?.authType !== 'Google') {
         throw new Error('User already exist but not google account, login with email');
@@ -123,12 +127,14 @@ export class AuthService {
     });
 
     await sendCookie(res, refreshToken);
+
     return res.redirect(`http://localhost:3000/sign-in?accessToken=${accessToken}`);
   }
 
   static async refreshNewToken(refreshToken: string): Promise<{ accessToken: string }> {
     const { userId, email, role } = verifyRefreshToken(refreshToken) as IAuthTokenPayload;
     if (!userId) throw new ResponseError(401, 'Refresh token not found');
+
     const hashedToken = hashToken(refreshToken);
 
     const existToken = await prisma.authDetail.findUnique({
@@ -136,15 +142,40 @@ export class AuthService {
     });
     if (!existToken) throw new ResponseError(401, 'Refresh token not found');
     const accessToken = generateAccessToken({ userId, email, role });
+
     return { accessToken };
   }
 
   static async forgotPassword(payload: ForgotPasswordPayload) {
-    const existUser = await prisma.user.findUnique({ where: { email: payload.email } });
-    if (!existUser) throw new ResponseError(400, 'Email not found');
+    const existUser = await prisma.user.findUnique({ where: { email: payload.email }, include: { authDetail: true } });
+    if (!existUser || !existUser.authDetail) throw new ResponseError(400, 'Email not found');
+    if (!existUser.authDetail.confirmed) throw new ResponseError(400, 'Email not verified, pleace verify your account');
+    if (existUser.authDetail.authType !== 'Local')
+      throw new ResponseError(400, 'This email is not registered with local account');
 
-    await EmailTemplate.forgotPassword(payload.email);
+    const { OTP, expires } = generateOTP(1, 'days');
+
+    await prisma.authDetail.update({
+      where: { userId: existUser.id },
+      data: { otp: { create: { code: OTP, expires } } },
+    });
+
+    await EmailTemplate.forgotPassword({ email: payload.email, OTP, username: existUser.username });
+
+    return { userId: existUser.id };
   }
+
+  static async checkOTP(otp: string) {
+    const isValid = await validateOtp(otp);
+
+    if (!isValid) throw new ResponseError(400, 'OTP not valid');
+
+    return true;
+  }
+
+  static async resetPassword(payload: ResetPasswordPayload) {}
+
+  static async changePassword(payload: ChangePasswordPayload) {}
 
   static async getSession(userId: string) {
     const user = await prisma.user.findUnique({
@@ -152,6 +183,7 @@ export class AuthService {
       include: { userProfile: true },
     });
     if (!user) throw new ResponseError(400, 'User not found');
+
     return sessionResponse(user);
   }
 

@@ -16,6 +16,8 @@ export type ResetPasswordPayload = z.infer<typeof AuthValidation.resetPassword>;
 
 export type ChangeEmailPayload = z.infer<typeof AuthValidation.changeEmail>;
 
+export type ChangePasswordPayload = z.infer<typeof AuthValidation.changePassword>;
+
 export type VerificationTokenPayload = {
   email: string;
   username: string;
